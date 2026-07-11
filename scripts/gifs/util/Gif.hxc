@@ -1,0 +1,45 @@
+package gifs.util;
+
+import gifs.struct.Frame;
+import gifs.struct.GifBytes;
+import gifs.struct.Disposal;
+import gifs.struct.Controls;
+
+class Gif {
+    /** Version of Gif file. */
+    public var version:Version;
+    
+    /** Logical Screen Descriptor. */
+    public var lsd:LSD;
+    
+    /** Width of the Gif image. (Alias to `lsd.width`) */
+    public var width(get, never):Int;
+    /** Height of the Gif image. (Alias to `lsd.height`) */
+    public var height(get, never):Int;
+    private inline function get_width():Int { return lsd.width; }
+    private inline function get_height():Int { return lsd.height; }
+    
+    /** Color of the background. */
+    public var backgroundColor:Int = 0;
+    /** Background color index. (Alias to `lsd.backgroundColorIndex`) */
+    public var backgroundIndex(get, never):Int;
+    private inline function get_backgroundIndex():Int { return lsd.backgroundColorIndex; }
+    
+    /** Array of frames in Gif */
+    public var frames:Array<GifFrame>;
+    
+    public function new() {
+        frames = new Array();
+    }
+    
+    /**
+     * Disposes Gif file.
+     */
+    public function dispose():Void {
+        lsd = null;
+        netscape = null;
+        for (frame in frames) frame.dispose();
+        frames = null;
+    }
+    
+}

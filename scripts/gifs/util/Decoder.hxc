@@ -1,0 +1,220 @@
+package gifs.util;
+
+import flixel.graphics.FlxGraphic;
+import flixel.util.FlxDestroyUtil;
+import flixel.FlxSprite;
+import haxe.io.Bytes;
+import openfl.utils.Assets;
+import openfl.utils.ByteArray;
+
+import gifs.struct.Frame;
+import gifs.struct.GifBytes;
+import gifs.struct.Disposal;
+import gifs.struct.Controls;
+
+import gifs.util.Gif;
+import gifs.util.LSD;
+import gifs.util.Player;
+// import gifs.util.Decoder;
+import gifs.util.Versions;
+
+/**
+ * class used to decode the gif's data into readable bytes
+ */
+class Decoder {
+    /**
+     * Decodes Gif file from Bytes data stream.
+     * @param bytes Input file data stream.
+     * @return Decoded Gif file.
+     */
+    public static function parseBytes(bytes:Bytes):Gif {
+        var gifBytes:GifBytes = new GifBytes(bytes);
+        var decoder:Decoder = new Decoder(gifBytes);
+        decoder.decodeGif();
+        return decoder.gif;
+    }
+    
+    /**
+     * Decodes Gif file from ByteArray data stream.
+     * 
+     * Note: It just converts ByteArray to Bytes (until haxe 3.2 it'll be slow on HTML5 target!)
+     * @param byteArray Input data stream.
+     * @return Decoded Gif file.
+     */
+    public static inline function parseByteArray(byteArray:ByteArray):Gif {
+        var bytes:Bytes = Bytes.alloc(byteArray.length);
+        byteArray.position = 0;
+        for (i in 0...byteArray.length) bytes.set(i, byteArray.readByte());
+        return parseBytes(bytes);
+
+    }
+    
+    /**
+     * Decodes Gif file from String.
+     * @param text Input String data.
+     * @return Decoded Gif file.
+     */
+    public static inline function parseText(text:String):Gif
+    {
+        return parseBytes(Bytes.ofString(text));
+    }
+    
+    /**
+     * Output GIF file with all data and frames
+     */
+    public var gif:Gif;
+    // Input stream
+    private var _input:GifBytes;
+    
+    /** Input data stream */
+    public var input(get, set):GifBytes;
+    private inline function get_input():GifBytes { return _input; }
+    private inline function set_input(v:GifBytes):GifBytes { return _input = v; }
+    
+    // Temporary data
+    private var _graphicControlExtension:Controls;
+    private var _globalColorTable:Array<Int>;
+    
+    public function new(input:GifBytes = null) {
+        this._input = input;
+    }
+    
+    /**
+     * Decodes Gif file.
+     */
+    public function decodeGif():Gif {
+        if (_input == null) return null;
+        _input.position = 0;
+        // Init GIF
+        this.gif = new Gif();
+        
+        if (this.readHeader()) {
+            // Logic screen descriptor
+            var lsd:LSD = new LSD(_input);
+            this.gif.lsd = lsd;
+            
+            // Global color table
+            if (lsd.globalColorTable) { // Global CT 
+                _globalColorTable = this.readColorTable(lsd.globalColorTableSize);
+                if (lsd.backgroundColorIndex < _globalColorTable.length)
+                this.gif.backgroundColor = _globalColorTable[lsd.backgroundColorIndex];
+            }
+            
+            readBlock();
+            _graphicControlExtension = null;
+            _globalColorTable = null;
+            _input = null;
+        } else {
+            throw "This is not a GIF file, or header invalid.";
+        }
+        return this.gif;
+    }
+    
+    private function readBlock():Void {
+        var id:Int;
+        while (true) {
+            id = _input.readByte();
+            switch (id) {
+                // Image descriptor / Image
+                case 0x2C: readImage();
+                // Extension block
+                case 0x21: readExtension();
+                // EOF
+                case 0x3B: return;
+            } 
+        }
+    }
+    
+    private function readExtension():Void
+    {
+        var subId:Int = _input.readByte();
+        switch (subId) {
+            case 0xF9:
+            _graphicControlExtension = new Controls(_input);
+
+            default: skipBlock();
+        }
+    }
+    
+    private function readImage():Void {
+        // Reading descriptor block
+        var imageDescriptor:ImageDescriptor = new ImageDescriptor(_input);
+        
+        // Color table set
+        var table:Array<Int> = _globalColorTable;
+        if (imageDescriptor.localColorTable)
+        table = this.readColorTable(imageDescriptor.localColorTableSize);
+        if (table == null) {
+            throw "Image didn't have color table!";
+            return;
+        }
+        
+        // Reading graphics data;
+        var decoder:GraphicsDecoder = new GraphicsDecoder(_input, imageDescriptor);
+        
+        // Make new GifFrame
+        var gifFrame:GifFrame = new GifFrame(table, imageDescriptor, decoder, _graphicControlExtension);
+        
+        gif.frames.push(gifFrame);
+        
+        // And clear
+        table = null;
+        decoder = null;
+        _graphicControlExtension = null;
+    }
+    
+    //=======================================================
+    //{ Reading not heavy-structural blocks
+    //=======================================================
+    
+    /**
+     * Reads header of GIF file.
+     * @return true, if header is valid, false otherwise.
+     */
+    private function readHeader():Bool {
+        // Is header valid?
+        var valid:Bool = _input.readUTFBytes(3) == "GIF";
+        if (valid) {
+            var version:String = _input.readUTFBytes(3);
+            if (version == "87a") this.gif.version = GifVersion.GIF87a;
+            else if (version == "89a") this.gif.version = GifVersion.GIF89a;
+            if (this.gif.version == null)  this.gif.version = GifVersion.GIF89a;
+            
+        }
+        return valid;
+    }
+    
+    /**
+     * Reads color table.
+     * Structure of Color Tables:
+     * RRGGBB RRGGBB RRGGBB
+     * @param colorsCount Count of colors in color table.
+     * @return Vector.<uint> with readed colors.
+     */
+    private function readColorTable(colorsCount:Int):Array<Int> {
+        var result:Array<Int> = [];
+        for (i in 0...colorsCount) {
+            result[i] =    0xFF000000 | // A
+                _input.readByte() << 16 | // R
+                _input.readByte() << 8  | // G
+                _input.readByte();        // B
+        }
+        return result;
+    }
+    
+    //=======================================================
+    //}
+    //=======================================================
+    
+    /**
+     * Utils; Skips blocks array
+     */
+    private function skipBlock():Void {
+        var blockSize:Int = 0;
+        do
+        {
+        blockSize = _input.readByte();
+        _input.position += blockSize;
+        } while (blockSize != 0);
+    }
+}

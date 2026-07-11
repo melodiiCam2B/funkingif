@@ -1,0 +1,116 @@
+package gifs.objects;
+
+import flixel.graphics.FlxGraphic;
+import flixel.util.FlxDestroyUtil;
+import flixel.FlxSprite;
+import haxe.io.Bytes;
+import openfl.utils.Assets;
+import openfl.utils.ByteArray;
+
+import gifs.struct.Frame;
+import gifs.struct.GifBytes;
+import gifs.struct.Disposal;
+import gifs.struct.Controls;
+
+import gifs.util.Gif;
+import gifs.util.LSD;
+import gifs.util.Player;
+import gifs.util.Decoder;
+import gifs.util.Versions;
+
+/**
+ * basic class to display gifs as a sprite
+ */
+@:nullSafety
+class FunkinGif extends FlxSprite{
+    /**
+	 * The Gif SpriteMap (warning: can be `null`).
+	 */
+	public var map(default, null):Null<GifMap>;
+
+    public function new(?x:Float = 0, ?y:Float = 0, ?gif:String):Void {
+		super(x, y);
+
+		if (gif != null) load(gif);
+	}
+
+    /**
+     * [Description]
+     * this function is used to
+     * 
+     * @param gif name/path of the gif file in question
+     * @param loop if the gif should endlessly loop, if blank it'll loop
+     * @param fps if the gif should have a set frame rate, if blank it'll use it's native frame rate
+     */
+    public function load(gif:String, mod:String, ?loop:Bool = true, ?fps:Int):Void {
+        if (fps == null)
+            fps = FlxG.updateFramerate;
+
+        map = Player.createMap(Decoder.parseBytes(Assets.getBytes(getPath(gif+'.gif'))));
+
+        // loadGraphic(FlxGraphic.fromBitmapData(map.data, false, null, false), true, map.width, map.height);
+        // this.animation.add('blank', map.frames, fps, loop);
+        // this.play();
+    }
+
+    public function getPath(file:String) {
+        var levelPath:String = getLibraryPathForce(file, mod);
+        if (Assets.exists(levelPath)) return levelPath;
+
+        return getPreloadPath(file);
+    }
+
+    static inline function getLibraryPathForce(file:String, library:String):String {
+        return 'mods/$library/$file';
+    }
+
+    static inline function getPreloadPath(file:String):String {
+        return 'assets/$file';
+    }
+
+    /**
+     * [Description]
+     * bulk use `addAnimations()`
+     * 
+     * @param data list of animations to add
+     */
+    public function animations(data:Array<Array<Dynamic>>){
+        for (i in 0 ... data.length) 
+            addAnimation(data[i][0], data[i][1], data[i][2], data[i][3]);
+    }
+
+    /**
+     * [Description]
+     * add an 'animation' to the gif
+     *
+     * @param id animation name
+     * @param frames specific frames for this animation
+     * @param fps the animation's frame rate
+     * @param loop if the animation should loop
+     */
+    public function addAnimation(id:String, frames:Array<Int>, fps:Int, loop:Bool = true) {
+        if (fps == null)
+            fps = FlxG.updateFramerate;
+
+        this.animation.add(id, frames, fps, loop);
+    }
+
+    // used to start or reset any given sprite's gif
+    public function play():Void {
+        this.animation.play('blank', true);
+    }
+    
+    // used to pause any given sprite's gif
+    public function pause():Void {
+        this.animation.pause();
+    }
+    
+    // used to resume playing any given sprite's gif
+    public function resume():Void {
+        this.animation.resume();
+    }
+
+	public override function destroy():Void {
+		super.destroy();
+    }
+}
