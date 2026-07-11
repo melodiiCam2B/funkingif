@@ -1,0 +1,24 @@
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.modding.module.Module;
+import states.TestMenu;
+import flixel.FlxG;
+import flixel.addons.transition.FlxTransitionableState;
+
+
+//my shitty attempt at detecting if we're in the mellowvalley mod.
+
+class Override extends Module {
+    public function new() {
+        // Priority is set to 3 here.
+        super("Override", 0, { state: MainMenuState });
+        //super("MainMenuOverride", 0);
+    }
+
+    public override function onStateChangeEnd(event:StateChangeScriptEvent) {
+        super.onStateChangeEnd(event);
+        trace("HEY BRO WE'RE IN MELLOW MENU");
+        FlxTransitionableState.skipNextTransIn = true;
+        FlxTransitionableState.skipNextTransOut = true;
+        FlxG.switchState(()->new TestMenu(null,null));
+    }
+}

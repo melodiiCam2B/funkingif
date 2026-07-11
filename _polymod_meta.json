@@ -1,0 +1,27 @@
+{
+    "title": "funkingif",
+    "id": "funkingif",
+    "description": "gifs in fnf hell yeah",
+    "author": "subpop girl",
+    "version_tag": "Initial Release",
+    "api_version": "0.8.4",
+    "mod_version": "0.1.0",
+    "contributors": [
+      {
+        "name": "Melodii2b",
+        "role": "coder, owner",
+        "url": "https://x.com/tobistupid_h2o"
+      },
+      {
+        "name": "MAJigsaw77",
+        "role": "coder of flxgif",
+        "url": "https://github.com/MAJigsaw77/flxgif"
+      },
+      {
+        "name": "yanrishatum",
+        "role": "coder of yagp",
+        "url": "https://github.com/yanrishatum/yagp/"
+      }
+    ],
+    "license": "Apache-2.0"
+}

@@ -1,0 +1,28 @@
+package states;
+
+import funkin.ui.MusicBeatState;
+import funkin.graphics.FunkinSprite;
+import StringTools;
+// import states.MVFreeplayState;
+
+class TestMenu extends MusicBeatState {
+    public var background:FunkinSprite;
+
+    public function new():Void {
+        super("TestMenu");
+    }
+
+    public override function create():Void {
+        super.create();
+
+        background = new FunkinSprite().loadGraphic(Paths.image("Bg_area_21"));
+        background.setGraphicSize(FlxG.width, FlxG.height);
+        background.updateHitbox();
+        background.screenCenter();
+        add(background);
+    }
+
+    public override function update(elapsed:Float):Void {
+        super.update(elapsed);
+    }
+}
