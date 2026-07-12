@@ -20,3 +20,9 @@ A: I... I don't know man, I thouht it'd be funny lowkey.
 
 ### Q: where can I download it?
 A: in the github releases or on the gamebanana page (coming soon) - alternatively if you just want to check the [current version](https://github.com/melodiiCam2B/funkingif/blob/main/_polymod_meta.json)
+
+# Credit Links
+
+* [MAJigsaw77](https://github.com/MAJigsaw77) coder of [FlxGif](https://github.com/MAJigsaw77/flxgif)  
+* [yanrishatum](https://github.com/yanrishatum) coder of [Yet Another Gif Player](https://github.com/yanrishatum/yagp) 
+
