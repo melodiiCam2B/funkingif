@@ -1,15 +1,32 @@
+## STATUS: [in dev]
+# FunkinGif
+this is a mod "library" for adding gifs as sprites on [Friday Night Funkin'](https://github.com/FunkinCrew/funkin)
+while not inherently a good execution of this concept, it "should" work (check releases or the gamebanana)
+
+I would recommend using 'flags' to avoid possible issues if funkingif doesn't exist or has problems getting parsed
+```haxe 
+    #if funkingif /* put your code here*/ #end
+```
+natually this won't always work, or could break.
+I do not claim this to work or be upheld forever, I simply enjoy coding and sometimes make silly things
+
+> [!NOTE]
+> Keep in mind that this is being developed for the windows builds of Funkin'
+> If you run into errors on other builds (Mac, Linux) I CAN'T help you, but you're free to open issues or offer help.
+
 # Disclaimer
 while I am crediting MAJigsaw77 and yanrishatum I'm not using their code directly,
-instead iterating on it to make everything work for funkin' since it still throws errors
+instead iterating and adjusting it to make everything work for funkin' considering errors were common when using the files directly
 
 specifically parameterized types: 
 ```haxe 
-    Array<Int>, Vector<Int>, DynamicAccess<Int>
+    var a = new Array<Int>();
+    var b = new Vector<Int>();
 ```
-these tend to throw errors relating to the paramter arrows <, >
+these tend to throw errors relating to the paramter arguement, and I have no way to fix this since it's a Hscript issue
 
-to avoid this I decided to recode it from the ground up so it works for Friday Night Funkin' (0.8.4) at the of writing.
-I understand this might make it less stable by avoiding the parameterization of types 
+to avoid this I decided to adjust the code to avoid this bevahioral error.
+I understand this might make it less stable by avoiding the parameterization of types but will guarantee it has a bigger chance of working
 
 # Variables & Functions
 ```haxe
