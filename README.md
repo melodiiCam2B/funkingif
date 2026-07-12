@@ -15,7 +15,7 @@ I do not claim this to work or be upheld forever, I simply enjoy coding and some
 > If you run into errors on other builds (Mac, Linux) I CAN'T help you, but you're free to open issues or offer help.
 
 # Disclaimer
-while I am crediting MAJigsaw77 and yanrishatum I'm not using their code directly,
+while I am crediting [MAJigsaw77](https://github.com/MAJigsaw77/flxgif) and [yanrishatum](https://github.com/yanrishatum/yagp) I'm not using their code directly,
 instead iterating and adjusting it to make everything work for funkin' considering errors were common when using the files directly
 
 specifically parameterized types: 
