@@ -9,7 +9,7 @@ specifically parameterized types:
 these tend to throw errors relating to the paramter arrows <, >
 
 to avoid this I decided to recode it from the ground up so it works for Friday Night Funkin' (0.8.4) at the of writing.
-I understand this might make it less stable (avoiding typing) 
+I understand this might make it less stable by avoiding the parameterization of types 
 
 # Variables & Functions
 ```haxe
@@ -35,9 +35,9 @@ function resume() {}
 
 # Usage
 ```haxe
-import gifs.objects.FunkinGif;
+import gifs.objects.GifSprite;
 
-var demoGif:FunkinGif = new FunkinGif(x, y).load('test', true, 24);
+var demoGif:GifSprite = new GifSprite(x, y).load('test', true, 24);
 demoGif.screenCenter();
 add(demoGif);
 ```

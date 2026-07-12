@@ -22,7 +22,7 @@ import gifs.util.Versions;
  * basic class to display gifs as a sprite
  */
 @:nullSafety
-class FunkinGif extends FlxSprite{
+class GifSprite extends FlxSprite{
     /**
 	 * The Gif SpriteMap (warning: can be `null`).
 	 */
@@ -46,7 +46,9 @@ class FunkinGif extends FlxSprite{
         if (fps == null)
             fps = FlxG.updateFramerate;
 
-        map = Player.createMap(Decoder.parseBytes(Assets.getBytes(getPath(gif+'.gif'))));
+        // map = Player.createMap(Decoder.parseBytes(Assets.getBytes(getPath(gif+'.gif'))));
+
+        Decoder.parseByteArray(Assets.getBytes(getPath(gif+'.gif')));
 
         // loadGraphic(FlxGraphic.fromBitmapData(map.data, false, null, false), true, map.width, map.height);
         // this.animation.add('blank', map.frames, fps, loop);

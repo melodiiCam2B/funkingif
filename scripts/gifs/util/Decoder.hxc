@@ -29,8 +29,10 @@ class Decoder {
      */
     public static function parseBytes(bytes:Bytes):Gif {
         var gifBytes:GifBytes = new GifBytes(bytes);
+
         var decoder:Decoder = new Decoder(gifBytes);
         decoder.decodeGif();
+
         return decoder.gif;
     }
     
@@ -45,8 +47,8 @@ class Decoder {
         var bytes:Bytes = Bytes.alloc(byteArray.length);
         byteArray.position = 0;
         for (i in 0...byteArray.length) bytes.set(i, byteArray.readByte());
-        return parseBytes(bytes);
 
+        return parseBytes(bytes);
     }
     
     /**
@@ -54,8 +56,7 @@ class Decoder {
      * @param text Input String data.
      * @return Decoded Gif file.
      */
-    public static inline function parseText(text:String):Gif
-    {
+    public static inline function parseText(text:String):Gif {
         return parseBytes(Bytes.ofString(text));
     }
     
@@ -64,33 +65,31 @@ class Decoder {
      */
     public var gif:Gif;
     // Input stream
-    private var _input:GifBytes;
-    
-    /** Input data stream */
-    public var input(get, set):GifBytes;
-    private inline function get_input():GifBytes { return _input; }
-    private inline function set_input(v:GifBytes):GifBytes { return _input = v; }
+    public var input:GifBytes;
+
+    private inline function getinput():GifBytes { return input; }
+    private inline function setinput(v:GifBytes):GifBytes { return input = v; }
     
     // Temporary data
     private var _graphicControlExtension:Controls;
     private var _globalColorTable:Array<Int>;
     
     public function new(input:GifBytes = null) {
-        this._input = input;
+        input = input;
     }
     
     /**
      * Decodes Gif file.
      */
     public function decodeGif():Gif {
-        if (_input == null) return null;
-        _input.position = 0;
+        if (input == null) return null;
+        input.position = 0;
         // Init GIF
         this.gif = new Gif();
         
         if (this.readHeader()) {
             // Logic screen descriptor
-            var lsd:LSD = new LSD(_input);
+            var lsd:LSD = new LSD(input);
             this.gif.lsd = lsd;
             
             // Global color table
@@ -103,7 +102,7 @@ class Decoder {
             readBlock();
             _graphicControlExtension = null;
             _globalColorTable = null;
-            _input = null;
+            input = null;
         } else {
             throw "This is not a GIF file, or header invalid.";
         }
@@ -113,7 +112,7 @@ class Decoder {
     private function readBlock():Void {
         var id:Int;
         while (true) {
-            id = _input.readByte();
+            id = input.readByte();
             switch (id) {
                 // Image descriptor / Image
                 case 0x2C: readImage();
@@ -127,10 +126,10 @@ class Decoder {
     
     private function readExtension():Void
     {
-        var subId:Int = _input.readByte();
+        var subId:Int = input.readByte();
         switch (subId) {
             case 0xF9:
-            _graphicControlExtension = new Controls(_input);
+            _graphicControlExtension = new Controls(input);
 
             default: skipBlock();
         }
@@ -138,8 +137,8 @@ class Decoder {
     
     private function readImage():Void {
         // Reading descriptor block
-        var imageDescriptor:ImageDescriptor = new ImageDescriptor(_input);
-        
+        var imageDescriptor:ImgDesc = new ImgDesc(input);
+
         // Color table set
         var table:Array<Int> = _globalColorTable;
         if (imageDescriptor.localColorTable)
@@ -148,12 +147,11 @@ class Decoder {
             throw "Image didn't have color table!";
             return;
         }
-        
         // Reading graphics data;
-        var decoder:GraphicsDecoder = new GraphicsDecoder(_input, imageDescriptor);
+        var decoder:GraphDec = new GraphDec(input, imageDescriptor);
         
         // Make new GifFrame
-        var gifFrame:GifFrame = new GifFrame(table, imageDescriptor, decoder, _graphicControlExtension);
+        var gifFrame:Frame = new Frame(table, imageDescriptor, decoder, _graphicControlExtension);
         
         gif.frames.push(gifFrame);
         
@@ -173,12 +171,12 @@ class Decoder {
      */
     private function readHeader():Bool {
         // Is header valid?
-        var valid:Bool = _input.readUTFBytes(3) == "GIF";
+        var valid:Bool = input.readUTFBytes(3) == "GIF";
         if (valid) {
-            var version:String = _input.readUTFBytes(3);
-            if (version == "87a") this.gif.version = GifVersion.GIF87a;
-            else if (version == "89a") this.gif.version = GifVersion.GIF89a;
-            if (this.gif.version == null)  this.gif.version = GifVersion.GIF89a;
+            var version:String = input.readUTFBytes(3);
+            if (version == "87a") this.gif.version = Versions.GIF87a;
+            else if (version == "89a") this.gif.version = Versions.GIF89a;
+            if (this.gif.version == null)  this.gif.version = Versions.GIF89a;
             
         }
         return valid;
@@ -195,9 +193,9 @@ class Decoder {
         var result:Array<Int> = [];
         for (i in 0...colorsCount) {
             result[i] =    0xFF000000 | // A
-                _input.readByte() << 16 | // R
-                _input.readByte() << 8  | // G
-                _input.readByte();        // B
+                input.readByte() << 16 | // R
+                input.readByte() << 8  | // G
+                input.readByte();        // B
         }
         return result;
     }
@@ -213,8 +211,8 @@ class Decoder {
         var blockSize:Int = 0;
         do
         {
-        blockSize = _input.readByte();
-        _input.position += blockSize;
+        blockSize = input.readByte();
+        input.position += blockSize;
         } while (blockSize != 0);
     }
 }

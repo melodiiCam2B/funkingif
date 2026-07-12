@@ -1,0 +1,104 @@
+package gifs.util;
+
+import gifs.struct.Frame;
+import gifs.struct.GifBytes;
+import gifs.struct.Disposal;
+import gifs.struct.Controls;
+
+/**
+ * Graphics block decoder. LZW decompression.
+ */
+class GraphDec {
+    /**
+     * Pixels in graphics data
+     */
+    public var pixels:GifVec;
+    
+    // Reading vars
+    private var blockSize:Int;
+    private var byte:Int;
+    private var bitsCount:Int;
+    
+    private var input:GifBytes;
+    
+    public function new(input:GifBytes, descriptor:ImgDesc) {
+        var minCodeSize:Int = input.readByte();
+        
+        blockSize = input.readByte() - 1;
+        byte = input.readByte();
+        bitsCount = 8;
+        
+        input = input;
+        
+        pixels = new GifVec(descriptor.width * descriptor.height, true);
+        
+        var clearCode:Int = 1 << minCodeSize;
+        var eoiCode:Int = clearCode + 1;
+        
+        var codeSize:Int = minCodeSize + 1;
+        var codeMask:Int = (1 << codeSize) - 1;
+        
+        var i:Int = 0; // Pixel write caret.
+        
+        var baseDict:Array<Array<Int>> = [];
+        for (i in 0...clearCode) baseDict[i] = [i];
+        baseDict[clearCode] = [];
+        baseDict[eoiCode] = [];
+
+        var dict:Array<Array<Int>> = [];
+        
+        var code:Int = 0;
+        var last:Int = 0;
+        while (i < pixels._data.length) {
+            last = code;
+            code = readCode(codeSize, codeMask);
+            
+            if (code == clearCode) {
+                dict = baseDict.copy();
+                codeSize = minCodeSize + 1;
+                codeMask = (1 << codeSize) - 1;
+                continue;
+            }
+            if (code == eoiCode) break;
+
+
+            if (last != clearCode) {
+                var newArr:Array<Int> = dict[last].copy();
+                newArr.push(dict[code][0]);
+                dict.push(newArr);
+            }
+
+            for (item in dict[code]) pixels._data[i++] = item;
+            
+            if (dict.length == (1 << codeSize) && codeSize < 12) {
+                codeSize++;
+                codeMask = (1 << codeSize) - 1;
+            }
+        }
+        
+        while (blockSize > 0) {
+            input.position += blockSize;
+            blockSize = input.readByte();
+        }
+    }
+    
+    /**
+     * Reads code from data input
+     * @param size Size of code in bits
+     * @return Next code or -1, if no codes to read.
+     */
+    private function readCode(size:Int, mask:Int):Int {
+        while (bitsCount < size) {
+            if (blockSize == 0) break;
+            byte |= input.readByte() << bitsCount;
+            bitsCount += 8;
+            blockSize--;
+            if (blockSize == 0) blockSize = input.readByte();
+        }
+        var code:Int = byte & mask;
+        byte >>= size;
+        bitsCount -= size;
+        
+        return code;
+    }
+}

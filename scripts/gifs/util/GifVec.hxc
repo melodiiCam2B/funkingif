@@ -1,0 +1,55 @@
+package gifs.util;
+
+class GifVec {
+    public var _data:Array<Dynamic>;
+    public var length(get, set):Int;
+    public var fixed:Bool;
+
+    public function new(size:Int = 0, fixedSize:Bool = false) {
+        _data = [];
+        fixed = fixedSize;
+        
+        // Pre-fill with null/0 to allocate the size
+        if (size > 0) {
+            for (i in 0...size) {
+                _data.push(0);
+            }
+        }
+    }
+
+    // Emulate index access using methods
+    public function get(index:Int):Dynamic {
+        return _data[index];
+    }
+
+    public function set(index:Int, value:Dynamic):Dynamic {
+        if (fixed && index >= _data.length) {
+            // Mimic Vector out-of-bounds safety if fixed
+            return null; 
+        }
+        _data[index] = value;
+        return value;
+    }
+
+    public function push(value:Dynamic):Int {
+        if (fixed) return _data.length;
+        return _data.push(value);
+    }
+
+    // Getters and Setters for .length property
+    private function get_length():Int {
+        return _data.length;
+    }
+
+    private function set_length(newLength:Int):Int {
+        if (fixed) return _data.length;
+        
+        while (_data.length < newLength) {
+            _data.push(0);
+        }
+        if (_data.length > newLength) {
+            _data = _data.slice(0, newLength);
+        }
+        return _data.length;
+    }
+}

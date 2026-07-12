@@ -2,7 +2,7 @@ package states;
 import funkin.ui.options.OptionsState;
 import funkin.ui.MusicBeatState;
 import funkin.graphics.FunkinSprite;
-import gifs.objects.FunkinGif;
+import gifs.objects.GifSprite;
 import StringTools;
 // import states.MVFreeplayState;
 
@@ -22,7 +22,7 @@ class TestMenu extends MusicBeatState {
         background.screenCenter();
         add(background);
 
-        var demoGif:FunkinGif = new FunkinGif().load('images/test', 'funkingif', true, 24);
+        var demoGif:GifSprite = new GifSprite().load('images/test', 'funkingif', true, 24);
         demoGif.screenCenter();
         add(demoGif);
     }

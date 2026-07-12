@@ -6,6 +6,11 @@ import gifs.util.Player;
 import gifs.util.Decoder;
 import gifs.util.Versions;
 
+import gifs.struct.Frame;
+import gifs.struct.GifBytes;
+import gifs.struct.Disposal;
+
+
 /**
  * Optional Graphics Control block, used for setting up disposal method, transparency, delay and user input.
  */
