@@ -45,7 +45,7 @@ class GraphDec {
         baseDict[clearCode] = [];
         baseDict[eoiCode] = [];
 
-        var dict:Array<Array<Int>> = [];
+        var dict:Array<Array<Int>> = baseDict.copy();
         
         var code:Int = 0;
         var last:Int = 0;
@@ -54,7 +54,6 @@ class GraphDec {
             code = readCode(codeSize, codeMask);
             
             if (code == clearCode) {
-                dict = baseDict.copy();
                 codeSize = minCodeSize + 1;
                 codeMask = (1 << codeSize) - 1;
                 continue;
